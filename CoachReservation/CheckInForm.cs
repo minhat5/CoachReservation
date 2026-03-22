@@ -23,7 +23,7 @@ namespace CoachReservation
 
         private void FindTicket_Click(object sender, EventArgs e)
         {
-            if (!ValidateFindTicket())
+            if (!Validate())
             {
                 return;
             }
@@ -32,6 +32,7 @@ namespace CoachReservation
 
         private void DisplayInfo()
         {
+            groupBox2.Visible = true;
             txtName.Text = ticket.Passenger.FullName;
             txtPhoneNumber.Text = ticket.Passenger.PhoneNumber;
             txtDeparturePoint.Text = ticket.Trip.Route.DeparturePoint;
@@ -44,7 +45,7 @@ namespace CoachReservation
             txtSeat.Text = string.Join(", ", seats);
         }
 
-        private bool ValidateFindTicket()
+        private bool Validate()
         {
             if (String.IsNullOrEmpty(txtFind.Text.Trim()))
             {
@@ -80,18 +81,10 @@ namespace CoachReservation
         {
             MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-        private bool ValidateCheckIn()
-        {
-            if (ticket == null)
-            {
-                DisplayError("Vui lòng tìm kiếm vé trước khi Check-in!");
-                return false;
-            }
-            return true;
-        }
 
         private void ClearInfo()
         {
+            groupBox2.Visible = false;
             txtName.Text = "";
             txtPhoneNumber.Text = "";
             txtDeparturePoint.Text = "";
@@ -104,10 +97,6 @@ namespace CoachReservation
         }
         private void CheckIn_Click(object sender, EventArgs e)
         {
-            if (!ValidateCheckIn())
-            {
-                return;
-            }
             ticket.TicketStatus = "Đã lên xe";
             try
             {
