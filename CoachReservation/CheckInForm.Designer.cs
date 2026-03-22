@@ -121,6 +121,7 @@
             groupBox2.TabIndex = 1;
             groupBox2.TabStop = false;
             groupBox2.Text = "Thông tin chi tiết vé";
+            groupBox2.Visible = false;
             // 
             // CheckIn
             // 
