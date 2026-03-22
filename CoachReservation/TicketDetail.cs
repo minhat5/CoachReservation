@@ -8,8 +8,13 @@ namespace CoachReservation
     public class TicketDetail
     {
         private int ticketDetailId;
-        private int ticketId;
-        private int tripSeatId;
+        private Ticket ticket;
+        private TripSeat tripSeat;
         private decimal price;
+
+        public int TicketDetailId { get => ticketDetailId; set => ticketDetailId = value; }
+        public Ticket Ticket { get => ticket; set => ticket = value; }
+        public TripSeat TripSeat { get => tripSeat; set => tripSeat = value; }
+        public decimal Price { get => price; set => price = value; }
     }
 }

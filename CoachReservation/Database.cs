@@ -10,12 +10,11 @@ namespace CoachReservation
 {
     public class Database
     {
-        private string connStr = "server=localhost;user=root;password=123456;database=coachreservationdb;";
         private MySqlConnection sqlConn;
 
         public Database()
         {
-            sqlConn = new MySqlConnection(connStr);
+            sqlConn = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;");
         }
 
         public MySqlConnection SqlConn { get => sqlConn; set => sqlConn = value; }
