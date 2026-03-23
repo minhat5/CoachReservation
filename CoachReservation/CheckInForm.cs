@@ -85,6 +85,7 @@ namespace CoachReservation
         private void ClearInfo()
         {
             groupBox2.Visible = false;
+            txtFind.Text = "";
             txtName.Text = "";
             txtPhoneNumber.Text = "";
             txtDeparturePoint.Text = "";
