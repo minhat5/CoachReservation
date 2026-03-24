@@ -15,10 +15,10 @@ namespace CoachReservation
         private TicketCatalog ticketCatalog;
         private Ticket ticket;
 
-        public CheckInForm()
+        public CheckInForm(TicketCatalog ticketCatalog)
         {
+            this.ticketCatalog = ticketCatalog;
             InitializeComponent();
-            ticketCatalog = new TicketCatalog();
         }
 
         private void FindTicket_Click(object sender, EventArgs e)

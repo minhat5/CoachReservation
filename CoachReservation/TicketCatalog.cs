@@ -11,9 +11,9 @@ namespace CoachReservation
     {
         private Database database;
 
-        public TicketCatalog()
+        public TicketCatalog(Database database)
         {
-            database = new Database();
+            this.database = database;
         }
 
         public void UpdateTicketStatus(int ticketId, string newStatus)
