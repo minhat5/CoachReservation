@@ -73,5 +73,40 @@ namespace CoachReservation
             }
             return maxSeats;
         }
+
+        public Vehicle GetVehicleById(int vehicleId)
+        {
+            try
+            {
+                database.OpenDatabase();
+                string query = "SELECT VehicleId, LicensePlate, VehicleType FROM Vehicle WHERE VehicleId = @vehicleId";
+                MySqlCommand cmd = new MySqlCommand(query, database.SqlConn);
+                cmd.Parameters.AddWithValue("@vehicleId", vehicleId);
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    Vehicle vehicle = new Vehicle
+                    {
+                        VehicleId = reader.GetInt32("VehicleId"),
+                        LicensePlate = reader.GetString("LicensePlate"),
+                        VehicleType = reader.GetString("VehicleType")
+                    };
+                    reader.Close();
+                    return vehicle;
+                }
+                reader.Close();
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting vehicle: " + ex.Message);
+                return null;
+            }
+            finally
+            {
+                database.CloseDatabase();
+            }
+        }
     }
 }

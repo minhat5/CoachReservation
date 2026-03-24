@@ -13,368 +13,327 @@ namespace CoachReservation
 {
     public partial class ConfigureSeatMapForm : Form
     {
-        private Dictionary<int, Button[,]> floorGrids = new();
-        private Seat selectedSeat;
         private SeatMapCatalog seatMapCatalog;
         private VehicleCatalog vehicleCatalog;
-        private List<Seat> allSeats = new();
         private SeatMap currentSeatMap;
-        private List<Vehicle> vehicles = new();
+        private Dictionary<int, List<Button>> seatGrids; // floor -> buttons
+        private Button selectedSeatButton;
+        private Seat selectedSeat;
 
         public ConfigureSeatMapForm(SeatMapCatalog seatMapCatalog, VehicleCatalog vehicleCatalog)
         {
             this.seatMapCatalog = seatMapCatalog;
             this.vehicleCatalog = vehicleCatalog;
+            seatGrids = new Dictionary<int, List<Button>>();
             InitializeComponent();
-            InitializeComboBoxes();
             LoadVehicles();
-        }
-
-        private void InitializeComboBoxes()
-        {
-            cbType.Items.Add("Ghế");
-            cbType.Items.Add("Lối đi");
-            cbType.SelectedIndex = 0;
+            SetupEventHandlers();
         }
 
         private void LoadVehicles()
         {
             try
             {
-                vehicles = vehicleCatalog.GetAllVehicles();
-
-                cbVehicle.Items.Clear();
-                foreach (Vehicle vehicle in vehicles)
-                {
-                    cbVehicle.Items.Add($"{vehicle.LicensePlate} - {vehicle.VehicleType}");
-                }
-
-                cbVehicle.DisplayMember = "Text";
+                List<Vehicle> vehicles = vehicleCatalog.GetAllVehicles();
+                cbVehicle.DataSource = vehicles;
+                cbVehicle.DisplayMember = "LicensePlate";
+                cbVehicle.ValueMember = "VehicleId";
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi tải danh sách phương tiện: " + ex.Message);
+                MessageBox.Show("Lỗi tải danh sách phương tiện: " + ex.Message);
             }
         }
 
-        private void CbVehicle_SelectedIndexChanged(object sender, EventArgs e)
+        private void SetupEventHandlers()
         {
-            if (cbVehicle.SelectedIndex == -1)
-                return;
-
-            Vehicle selectedVehicle = vehicles[cbVehicle.SelectedIndex];
-
-            // Try to load existing SeatMap
-            currentSeatMap = seatMapCatalog.GetSeatMapByVehicleId(selectedVehicle.VehicleId);
-
-            if (currentSeatMap != null)
-            {
-                nbFloor.Value = currentSeatMap.Floors;
-                nbColumn.Value = currentSeatMap.GridColumns;
-                nbRow.Value = currentSeatMap.GridRows;
-            }
-            else
-            {
-                // Reset to default values
-                nbFloor.Value = 1;
-                nbColumn.Value = 10;
-                nbRow.Value = 10;
-            }
+            InitSeatGrid.Click += InitSeatGrid_Click;
+            SaveSeatConfiguration.Click += SaveSeatConfiguration_Click;
+            SaveSelection.Click += SaveSelection_Click;
         }
 
         private void InitSeatGrid_Click(object sender, EventArgs e)
         {
-            if (cbVehicle.SelectedIndex == -1)
+            if (cbVehicle.SelectedValue == null)
             {
-                MessageBox.Show("Vui lòng chọn phương tiện", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn phương tiện");
                 return;
             }
 
-            Vehicle selectedVehicle = vehicles[cbVehicle.SelectedIndex];
-
-            // Check if SeatMap exists for this vehicle
-            currentSeatMap = seatMapCatalog.GetSeatMapByVehicleId(selectedVehicle.VehicleId);
-
-            if (currentSeatMap != null)
-            {
-                // Load existing configuration
-                nbFloor.Value = currentSeatMap.Floors;
-                nbColumn.Value = currentSeatMap.GridColumns;
-                nbRow.Value = currentSeatMap.GridRows;
-
-                // Load seats from database
-                allSeats = seatMapCatalog.GetSeatsBySeatMapId(currentSeatMap.SeatMapId);
-                DisplaySeatGrid(currentSeatMap.Floors, (int)nbColumn.Value, (int)nbRow.Value);
-            }
-            else
-            {
-                // Create new configuration
-                int floors = (int)nbFloor.Value;
-                int columns = (int)nbColumn.Value;
-                int rows = (int)nbRow.Value;
-
-                if (floors <= 0 || columns <= 0 || rows <= 0)
-                {
-                    MessageBox.Show("Số tầng, dãy, hàng phải lớn hơn 0", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                allSeats = new List<Seat>();
-                DisplaySeatGrid(floors, columns, rows);
-            }
-        }
-
-        private void DisplaySeatGrid(int floors, int columns, int rows)
-        {
-            tabControlFloors.TabPages.Clear();
-            floorGrids.Clear();
-
-            // Tạo TabPages cho mỗi tầng
-            for (int floor = 1; floor <= floors; floor++)
-            {
-                TabPage tabPage = new TabPage($"Tầng {floor}");
-                tabControlFloors.TabPages.Add(tabPage);
-
-                Panel panel = new Panel();
-                panel.Dock = DockStyle.Fill;
-                panel.AutoScroll = true;
-                panel.BackColor = SystemColors.Control;
-                tabPage.Controls.Add(panel);
-
-                Button[,] gridButtons = new Button[rows, columns];
-                int buttonSize = 40;
-                int padding = 5;
-
-                // Tạo grid button cho tầng này
-                for (int row = 0; row < rows; row++)
-                {
-                    for (int col = 0; col < columns; col++)
-                    {
-                        Button btn = new Button();
-                        btn.Width = buttonSize;
-                        btn.Height = buttonSize;
-                        btn.Left = col * (buttonSize + padding) + 10;
-                        btn.Top = row * (buttonSize + padding) + 10;
-                        btn.Text = $"{row + 1}{(char)('A' + col)}";
-                        btn.BackColor = Color.White;
-                        btn.ForeColor = Color.Black;
-
-                        // Check if this seat exists in database
-                        var existingSeat = allSeats.FirstOrDefault(s => s.Floor == floor && s.RowIndex == row && s.ColumnIndex == col);
-                        if (existingSeat != null)
-                        {
-                            if (existingSeat.SeatType == "Lối đi")
-                            {
-                                btn.BackColor = Color.Gray;
-                            }
-                            else
-                            {
-                                btn.BackColor = Color.LightBlue;
-                            }
-                        }
-
-                        btn.Click += (s, args) => SeatButton_Click(btn, floor, row, col);
-                        panel.Controls.Add(btn);
-                        gridButtons[row, col] = btn;
-                    }
-                }
-
-                floorGrids[floor] = gridButtons;
-            }
-        }
-
-        private void SeatButton_Click(Button button, int floor, int row, int column)
-        {
-            // Kiểm tra ghế đã tồn tại trong database chưa
-            var existingSeat = allSeats.FirstOrDefault(s => s.Floor == floor && s.RowIndex == row && s.ColumnIndex == column);
-            
-            if (existingSeat != null)
-            {
-                // Copy toàn bộ từ existing seat
-                selectedSeat = new Seat
-                {
-                    SeatId = existingSeat.SeatId,
-                    SeatCode = existingSeat.SeatCode,
-                    Floor = existingSeat.Floor,
-                    RowIndex = existingSeat.RowIndex,
-                    ColumnIndex = existingSeat.ColumnIndex,
-                    SeatType = existingSeat.SeatType
-                };
-            }
-            else
-            {
-                // Tạo mới nếu chưa tồn tại
-                selectedSeat = new Seat
-                {
-                    Floor = floor,
-                    RowIndex = row,
-                    ColumnIndex = column,
-                    SeatCode = button.Text,
-                    SeatType = "Ghế"  // Default
-                };
-            }
-
-            // Update UI
-            txtSeatCode.Text = selectedSeat.SeatCode;
-            cbType.SelectedItem = selectedSeat.SeatType;
-        }
-
-        private void SaveSelection_Click(object sender, EventArgs e)
-        {
             try
             {
-                // 0️⃣ Kiểm tra đã chọn ghế hay chưa
-                if (selectedSeat == null)
+                int vehicleId = (int)cbVehicle.SelectedValue;
+                currentSeatMap = seatMapCatalog.GetSeatMapByVehicleId(vehicleId);
+
+                if (currentSeatMap != null)
                 {
-                    MessageBox.Show("Vui lòng chọn một ghế trước", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                // 1️⃣ Lấy thông tin ô ghế đã chọn
-                selectedSeat.SeatCode = txtSeatCode.Text;
-                selectedSeat.SeatType = cbType.SelectedItem?.ToString() ?? "Ghế";
-
-                // 2️⃣ Lấy xe đã chọn
-                if (cbVehicle.SelectedIndex == -1)
-                {
-                    MessageBox.Show("Vui lòng chọn phương tiện", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                Vehicle selectedVehicle = vehicles[cbVehicle.SelectedIndex];
-                int floors = (int)nbFloor.Value;
-                int columns = (int)nbColumn.Value;
-                int rows = (int)nbRow.Value;
-
-                // 3️⃣ Tạo hoặc lấy SeatMap từ DB (nếu chưa có)
-                int seatMapId = seatMapCatalog.CreateOrGetSeatMapForVehicle(
-                    selectedVehicle.VehicleId, floors, columns, rows
-                );
-
-                if (seatMapId == -1)
-                {
-                    MessageBox.Show("Lỗi khi tạo sơ đồ ghế", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                // 4️⃣ Lưu 1 ô ghế vào DB
-                bool success = seatMapCatalog.SaveSingleSeat(seatMapId, selectedSeat);
-
-                // 5️⃣ Cập nhật danh sách local + hiển thị
-                if (success)
-                {
-                    // Kiểm tra ghế đã tồn tại trong danh sách chưa
-                    var existingSeat = allSeats.FirstOrDefault(s => 
-                        s.Floor == selectedSeat.Floor && 
-                        s.RowIndex == selectedSeat.RowIndex && 
-                        s.ColumnIndex == selectedSeat.ColumnIndex);
-
-                    if (existingSeat != null)
-                    {
-                        // Cập nhật ghế cũ
-                        existingSeat.SeatCode = selectedSeat.SeatCode;
-                        existingSeat.SeatType = selectedSeat.SeatType;
-                    }
-                    else
-                    {
-                        // Thêm ghế mới
-                        allSeats.Add(selectedSeat);
-                    }
-
-                    RefreshSeatGridDisplay();
-                    MessageBox.Show($"Đã lưu: {selectedSeat.SeatCode}", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    // Load existing seat map
+                    DisplayExistingSeatMap(currentSeatMap);
                 }
                 else
                 {
-                    MessageBox.Show("Lỗi khi lưu ghế. Vui lòng thử lại.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // Create new seat map
+                    CreateNewSeatMap(vehicleId);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi khởi tạo lưới ghế: " + ex.Message);
             }
         }
 
-        private void RefreshSeatGridDisplay()
+        private void DisplayExistingSeatMap(SeatMap seatMap)
         {
-            foreach (var floor in floorGrids.Keys)
+            // Clear existing tabs
+            tabControlFloors.TabPages.Clear();
+            seatGrids.Clear();
+
+            // Create tabs for each floor
+            List<Seat> allSeats = seatMapCatalog.GetSeatsBySeatMapId(seatMap.SeatMapId);
+
+            for (int floor = 1; floor <= seatMap.Floors; floor++)
             {
-                var gridButtons = floorGrids[floor];
-                for (int row = 0; row < gridButtons.GetLength(0); row++)
+                TabPage tabPage = new TabPage($"Tầng {floor}");
+                TableLayoutPanel tableLayout = new TableLayoutPanel
                 {
-                    for (int col = 0; col < gridButtons.GetLength(1); col++)
+                    Dock = DockStyle.Fill,
+                    RowCount = seatMap.GridRows,
+                    ColumnCount = seatMap.GridColumns,
+                    AutoSize = true
+                };
+
+                List<Button> floorSeats = new List<Button>();
+
+                for (int row = 0; row < seatMap.GridRows; row++)
+                {
+                    tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / seatMap.GridRows));
+
+                    for (int col = 0; col < seatMap.GridColumns; col++)
                     {
-                        var btn = gridButtons[row, col];
-                        var seat = allSeats.FirstOrDefault(s => s.Floor == floor && s.RowIndex == row && s.ColumnIndex == col);
-                        
-                        if (seat != null)
+                        if (row == 0)
                         {
-                            btn.BackColor = seat.SeatType == "Lối đi" ? Color.Gray : Color.LightBlue;
+                            tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / seatMap.GridColumns));
                         }
-                        else
-                        {
-                            btn.BackColor = Color.White;
-                        }
-                        btn.ForeColor = Color.Black;
+
+                        Seat seat = allSeats.FirstOrDefault(s => 
+                            s.Floor == floor && s.RowIndex == row && s.ColumnIndex == col);
+
+                        Button seatButton = CreateSeatButton(seat);
+                        tableLayout.Controls.Add(seatButton, col, row);
+                        floorSeats.Add(seatButton);
                     }
                 }
+
+                tabPage.Controls.Add(tableLayout);
+                tabControlFloors.TabPages.Add(tabPage);
+                seatGrids[floor] = floorSeats;
+            }
+        }
+
+        private void CreateNewSeatMap(int vehicleId)
+        {
+            int floors = (int)nbFloor.Value;
+            int columns = (int)nbColumn.Value;
+            int rows = (int)nbRow.Value;
+
+            if (floors <= 0 || columns <= 0 || rows <= 0)
+            {
+                MessageBox.Show("Vui lòng nhập số tầng, dãy và hàng > 0");
+                return;
+            }
+
+            // Get vehicle
+            Vehicle selectedVehicle = vehicleCatalog.GetVehicleById(vehicleId);
+            if (selectedVehicle == null)
+            {
+                MessageBox.Show("Không tìm thấy phương tiện");
+                return;
+            }
+
+            // Create SeatMap object
+            currentSeatMap = new SeatMap
+            {
+                Vehicle = selectedVehicle,
+                Floors = floors,
+                GridColumns = columns,
+                GridRows = rows
+            };
+
+            // Clear existing tabs
+            tabControlFloors.TabPages.Clear();
+            seatGrids.Clear();
+
+            // Create tabs for each floor
+            for (int floor = 1; floor <= floors; floor++)
+            {
+                TabPage tabPage = new TabPage($"Tầng {floor}");
+                TableLayoutPanel tableLayout = new TableLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    RowCount = rows,
+                    ColumnCount = columns,
+                    AutoSize = true
+                };
+
+                List<Button> floorSeats = new List<Button>();
+
+                for (int row = 0; row < rows; row++)
+                {
+                    tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / rows));
+
+                    for (int col = 0; col < columns; col++)
+                    {
+                        if (row == 0)
+                        {
+                            tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / columns));
+                        }
+
+                        Seat newSeat = new Seat
+                        {
+                            SeatMap = currentSeatMap,
+                            Floor = floor,
+                            RowIndex = row,
+                            ColumnIndex = col,
+                            SeatCode = "",
+                            SeatType = ""
+                        };
+
+                        Button seatButton = CreateSeatButton(newSeat);
+                        tableLayout.Controls.Add(seatButton, col, row);
+                        floorSeats.Add(seatButton);
+                    }
+                }
+
+                tabPage.Controls.Add(tableLayout);
+                tabControlFloors.TabPages.Add(tabPage);
+                seatGrids[floor] = floorSeats;
+            }
+        }
+
+        private Button CreateSeatButton(Seat seat)
+        {
+            // Create a default seat if null
+            if (seat == null)
+            {
+                seat = new Seat
+                {
+                    SeatCode = "",
+                    SeatType = ""
+                };
+            }
+
+            Button button = new Button
+            {
+                Dock = DockStyle.Fill,
+                Margin = new Padding(2),
+                Font = new Font("Arial", 8),
+                Tag = seat
+            };
+
+            // Display seat code and set button appearance based on seat type
+            button.Text = !string.IsNullOrEmpty(seat.SeatCode) ? seat.SeatCode : "";
+            
+            if (!string.IsNullOrEmpty(seat.SeatType))
+            {
+                button.BackColor = seat.SeatType == "Lối đi" ? Color.LightGray : Color.LightGreen;
+            }
+            else
+            {
+                button.BackColor = Color.White;
+            }
+
+            button.Click += SeatButton_Click;
+            return button;
+        }
+
+        private void SeatButton_Click(object sender, EventArgs e)
+        {
+            Button button = sender as Button;
+            if (button?.Tag is Seat seat)
+            {
+                selectedSeatButton = button;
+                selectedSeat = seat;
+
+                // Update properties panel
+                cbType.SelectedItem = seat.SeatType;
+                txtSeatCode.Text = seat.SeatCode;
+            }
+        }
+
+        private void SaveSelection_Click(object sender, EventArgs e)
+        {
+            if (selectedSeat == null)
+            {
+                MessageBox.Show("Vui lòng chọn một ghế");
+                return;
+            }
+
+            try
+            {
+                selectedSeat.SeatType = cbType.SelectedItem?.ToString() ?? "";
+                selectedSeat.SeatCode = txtSeatCode.Text;
+
+                // Update button appearance and text
+                selectedSeatButton.Text = !string.IsNullOrEmpty(selectedSeat.SeatCode) ? selectedSeat.SeatCode : "";
+                
+                if (!string.IsNullOrEmpty(selectedSeat.SeatType))
+                {
+                    selectedSeatButton.BackColor = selectedSeat.SeatType == "Lối đi" ? Color.LightGray : Color.LightGreen;
+                }
+                else
+                {
+                    selectedSeatButton.BackColor = Color.White;
+                }
+
+                MessageBox.Show("Lưu ô thành công");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi lưu ô: " + ex.Message);
             }
         }
 
         private void SaveSeatConfiguration_Click(object sender, EventArgs e)
         {
-            // 1️⃣ Kiểm tra xe được chọn
-            if (cbVehicle.SelectedIndex == -1)
+            if (currentSeatMap == null)
             {
-                MessageBox.Show("Vui lòng chọn phương tiện", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng khởi tạo lưới ghế trước");
                 return;
             }
 
-            // 2️⃣ Kiểm tra có ghế được cấu hình
-            if (allSeats.Count == 0)
-            {
-                MessageBox.Show("Vui lòng cấu hình ít nhất một ghế", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            // 3️⃣ Lấy thông tin xe và cấu hình
-            Vehicle selectedVehicle = vehicles[cbVehicle.SelectedIndex];
-            int floors = (int)nbFloor.Value;
-            int columns = (int)nbColumn.Value;
-            int rows = (int)nbRow.Value;
-
-            // 4️⃣ Hỏi xác nhận lưu
-            DialogResult result = MessageBox.Show(
-                $"Lưu cấu hình xe {selectedVehicle.LicensePlate}?\n" +
-                $"Tổng ghế: {allSeats.Count}\n" +
-                $"Cấu hình: {floors} tầng, {columns} dãy, {rows} hàng",
-                "Xác nhận", MessageBoxButtons.OKCancel
-            );
-
-            if (result != DialogResult.OK) return;
-
-            // 5️⃣ LƯU VÀO DATABASE
             try
             {
-                seatMapCatalog.SaveSeatMapConfiguration(
-                    selectedVehicle.VehicleId,
-                    floors, columns, rows,
-                    allSeats
-                );
+                // Save seat map to database
+                int seatMapId = seatMapCatalog.SaveSeatMap(currentSeatMap);
+                if (seatMapId <= 0)
+                {
+                    MessageBox.Show("Lỗi lưu sơ đồ ghế");
+                    return;
+                }
+                currentSeatMap.SeatMapId = seatMapId;
 
-                MessageBox.Show("Lưu cấu hình ghế thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                
-                // Reset form
-                cbVehicle.SelectedIndex = -1;
-                allSeats.Clear();
-                tabControlFloors.TabPages.Clear();
-                floorGrids.Clear();
-                txtSeatCode.Clear();
-                cbType.SelectedIndex = 0;
+                // Collect all seats from the grid
+                List<Seat> allSeats = new List<Seat>();
+                foreach (var kvp in seatGrids)
+                {
+                    foreach (Button button in kvp.Value)
+                    {
+                        if (button.Tag is Seat seat)
+                        {
+                            seat.SeatMap = currentSeatMap;
+                            allSeats.Add(seat);
+                        }
+                    }
+                }
+
+                // Save all seats to database
+                seatMapCatalog.SaveSeats(allSeats);
+
+                MessageBox.Show("Lưu cấu hình ghế thành công");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Lỗi khi lưu cấu hình: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi lưu cấu hình: " + ex.Message);
             }
         }
     }
