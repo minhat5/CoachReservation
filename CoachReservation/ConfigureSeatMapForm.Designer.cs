@@ -180,6 +180,7 @@
             // cbType
             // 
             cbType.FormattingEnabled = true;
+            cbType.Items.AddRange(new object[] { "Ghế", "Lối đi" });
             cbType.Location = new Point(95, 31);
             cbType.Name = "cbType";
             cbType.Size = new Size(274, 23);
@@ -241,10 +242,6 @@
             Controls.Add(groupBox1);
             Name = "ConfigureSeatMapForm";
             Text = "Quản lý xe - Cấu hình Sơ đồ ghế";
-            cbVehicle.SelectedIndexChanged += CbVehicle_SelectedIndexChanged;
-            InitSeatGrid.Click += InitSeatGrid_Click;
-            SaveSelection.Click += SaveSelection_Click;
-            SaveSeatConfiguration.Click += SaveSeatConfiguration_Click;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)nbRow).EndInit();
