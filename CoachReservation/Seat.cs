@@ -13,6 +13,7 @@ namespace CoachReservation
         private int floor;
         private int rowIndex;
         private int columnIndex;
+        private string seatType;
 
         public int SeatId { get => seatId; set => seatId = value; }
         public string SeatCode { get => seatCode; set => seatCode = value; }
@@ -20,5 +21,6 @@ namespace CoachReservation
         public int RowIndex { get => rowIndex; set => rowIndex = value; }
         public int ColumnIndex { get => columnIndex; set => columnIndex = value; }
         public SeatMap SeatMap { get => seatMap; set => seatMap = value; }
+        public string SeatType { get => seatType; set => seatType = value; }
     }
 }

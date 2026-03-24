@@ -14,8 +14,9 @@ namespace CoachReservation
             RouteCatalog routeCatalog = new RouteCatalog(database);
             VehicleCatalog vehicleCatalog = new VehicleCatalog(database);
             TripCatalog tripCatalog = new TripCatalog(database);
+            SeatMapCatalog seatMapCatalog = new SeatMapCatalog(database);
             ApplicationConfiguration.Initialize();
-            Application.Run(new SearchTripsForm(routeCatalog, vehicleCatalog, tripCatalog));
+            Application.Run(new ConfigureSeatMapForm(seatMapCatalog, vehicleCatalog));
         }
     }
 }
