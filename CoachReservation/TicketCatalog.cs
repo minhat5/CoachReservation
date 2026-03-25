@@ -25,15 +25,7 @@ namespace CoachReservation
                 MySqlCommand cmd = new MySqlCommand(query, database.SqlConn);
                 cmd.Parameters.AddWithValue("@newStatus", newStatus);
                 cmd.Parameters.AddWithValue("@ticketId", ticketId);
-                int rowsAffected = cmd.ExecuteNonQuery();
-                if (rowsAffected > 0)
-                {
-                    Console.WriteLine("Ticket status updated successfully.");
-                }
-                else
-                {
-                    Console.WriteLine("No ticket found with the provided ID.");
-                }
+                cmd.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
@@ -77,7 +69,6 @@ namespace CoachReservation
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error getting seats: " + ex.Message);
                 return new List<string>();
             }
             finally
@@ -125,12 +116,7 @@ namespace CoachReservation
                         string departurePoint = reader.GetString("DeparturePoint");
                         string destination = reader.GetString("Destination");
 
-                        route = new Route
-                        {
-                            RouteId = routeId,
-                            DeparturePoint = departurePoint,
-                            Destination = destination
-                        };
+                        route = new Route(routeId, departurePoint, destination);
                     }
 
                     Vehicle vehicle = null;
@@ -142,13 +128,7 @@ namespace CoachReservation
                         string vehicleType = reader.GetString("VehicleType");
                         int totalSeats = reader.GetInt32("TotalSeats");
 
-                        vehicle = new Vehicle
-                        {
-                            VehicleId = vehicleId,
-                            LicensePlate = licensePlate,
-                            VehicleType = vehicleType,
-                            TotalSeats = totalSeats
-                        };
+                        vehicle = new Vehicle(vehicleId, licensePlate, vehicleType, totalSeats);
                     }
 
                     Trip trip = null;
@@ -161,16 +141,7 @@ namespace CoachReservation
                         decimal basePrice = reader.GetDecimal("BasePrice");
                         string tripStatus = reader.GetString("Status");
 
-                        trip = new Trip
-                        {
-                            TripId = tripId,
-                            DepartureDate = departureDate,
-                            DepartureTime = departureTime,
-                            BasePrice = basePrice,
-                            Status = tripStatus,
-                            Route = route,
-                            Vehicle = vehicle
-                        };
+                        trip = new Trip(tripId, route, vehicle, departureDate, departureTime, basePrice, tripStatus);
                     }
 
                     Passenger passenger = null;
@@ -199,8 +170,179 @@ namespace CoachReservation
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error finding ticket: " + ex.Message);
                 return null;
+            }
+            finally
+            {
+                database.CloseDatabase();
+            }
+        }
+
+        public Passenger GetPassengerById(int passengerId)
+        {
+            try
+            {
+                database.OpenDatabase();
+                string query = "SELECT PassengerId, FullName, PhoneNumber FROM Passenger WHERE PassengerId = @passengerId";
+                MySqlCommand cmd = new MySqlCommand(query, database.SqlConn);
+                cmd.Parameters.AddWithValue("@passengerId", passengerId);
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    Passenger passenger = new Passenger
+                    {
+                        PassengerId = reader.GetInt32("PassengerId"),
+                        FullName = reader.GetString("FullName"),
+                        PhoneNumber = reader.GetString("PhoneNumber")
+                    };
+                    reader.Close();
+                    return passenger;
+                }
+
+                reader.Close();
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error getting passenger: " + ex.Message);
+                return null;
+            }
+            finally
+            {
+                database.CloseDatabase();
+            }
+        }
+
+        public bool AreSeatsStillAvailable(int tripId, List<int> seatIds)
+        {
+            if (seatIds == null || seatIds.Count == 0)
+            {
+                return false;
+            }
+
+            try
+            {
+                database.OpenDatabase();
+                string seatIdList = string.Join(",", seatIds);
+                string query = $@"SELECT COUNT(*)
+                                 FROM TripSeat
+                                 WHERE TripId = @tripId
+                                 AND Status = 'Đã đặt'
+                                 AND SeatId IN ({seatIdList})";
+
+                MySqlCommand cmd = new MySqlCommand(query, database.SqlConn);
+                cmd.Parameters.AddWithValue("@tripId", tripId);
+                object result = cmd.ExecuteScalar();
+                int bookedCount = result != null && result != DBNull.Value ? Convert.ToInt32(result) : 0;
+
+                return bookedCount == 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error checking seat availability: " + ex.Message);
+                return false;
+            }
+            finally
+            {
+                database.CloseDatabase();
+            }
+        }
+
+        public int CreateTicketWithSeats(int tripId, int passengerId, List<int> seatIds, decimal basePrice)
+        {
+            if (seatIds == null || seatIds.Count == 0)
+            {
+                return -1;
+            }
+
+            MySqlTransaction transaction = null;
+            try
+            {
+                database.OpenDatabase();
+                transaction = database.SqlConn.BeginTransaction();
+
+                string seatIdList = string.Join(",", seatIds);
+                string checkQuery = $@"SELECT COUNT(*)
+                                      FROM TripSeat
+                                      WHERE TripId = @tripId
+                                      AND Status = 'Đã đặt'
+                                      AND SeatId IN ({seatIdList})";
+
+                MySqlCommand checkCmd = new MySqlCommand(checkQuery, database.SqlConn, transaction);
+                checkCmd.Parameters.AddWithValue("@tripId", tripId);
+                int bookedCount = Convert.ToInt32(checkCmd.ExecuteScalar());
+                if (bookedCount > 0)
+                {
+                    transaction.Rollback();
+                    return -1;
+                }
+
+                decimal totalAmount = basePrice * seatIds.Count;
+                string insertTicketQuery = @"INSERT INTO Ticket (TripId, PassengerId, BookingDate, TotalAmount, TicketStatus)
+                                           VALUES (@tripId, @passengerId, @bookingDate, @totalAmount, @ticketStatus)";
+                MySqlCommand insertTicketCmd = new MySqlCommand(insertTicketQuery, database.SqlConn, transaction);
+                insertTicketCmd.Parameters.AddWithValue("@tripId", tripId);
+                insertTicketCmd.Parameters.AddWithValue("@passengerId", passengerId);
+                insertTicketCmd.Parameters.AddWithValue("@bookingDate", DateTime.Now);
+                insertTicketCmd.Parameters.AddWithValue("@totalAmount", totalAmount);
+                insertTicketCmd.Parameters.AddWithValue("@ticketStatus", "Đã thanh toán");
+                insertTicketCmd.ExecuteNonQuery();
+
+                int ticketId = (int)insertTicketCmd.LastInsertedId;
+
+                foreach (int seatId in seatIds)
+                {
+                    int tripSeatId;
+
+                    string findTripSeatQuery = @"SELECT TripSeatId FROM TripSeat WHERE TripId = @tripId AND SeatId = @seatId LIMIT 1";
+                    MySqlCommand findTripSeatCmd = new MySqlCommand(findTripSeatQuery, database.SqlConn, transaction);
+                    findTripSeatCmd.Parameters.AddWithValue("@tripId", tripId);
+                    findTripSeatCmd.Parameters.AddWithValue("@seatId", seatId);
+                    object existingTripSeatId = findTripSeatCmd.ExecuteScalar();
+
+                    if (existingTripSeatId != null)
+                    {
+                        tripSeatId = Convert.ToInt32(existingTripSeatId);
+                        string updateTripSeatQuery = @"UPDATE TripSeat SET Status = 'Đã đặt' WHERE TripSeatId = @tripSeatId";
+                        MySqlCommand updateTripSeatCmd = new MySqlCommand(updateTripSeatQuery, database.SqlConn, transaction);
+                        updateTripSeatCmd.Parameters.AddWithValue("@tripSeatId", tripSeatId);
+                        updateTripSeatCmd.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        string insertTripSeatQuery = @"INSERT INTO TripSeat (TripId, SeatId, Status) VALUES (@tripId, @seatId, 'Đã đặt')";
+                        MySqlCommand insertTripSeatCmd = new MySqlCommand(insertTripSeatQuery, database.SqlConn, transaction);
+                        insertTripSeatCmd.Parameters.AddWithValue("@tripId", tripId);
+                        insertTripSeatCmd.Parameters.AddWithValue("@seatId", seatId);
+                        insertTripSeatCmd.ExecuteNonQuery();
+                        tripSeatId = (int)insertTripSeatCmd.LastInsertedId;
+                    }
+
+                    string insertDetailQuery = @"INSERT INTO TicketDetail (TicketId, TripSeatId, Price)
+                                               VALUES (@ticketId, @tripSeatId, @price)";
+                    MySqlCommand insertDetailCmd = new MySqlCommand(insertDetailQuery, database.SqlConn, transaction);
+                    insertDetailCmd.Parameters.AddWithValue("@ticketId", ticketId);
+                    insertDetailCmd.Parameters.AddWithValue("@tripSeatId", tripSeatId);
+                    insertDetailCmd.Parameters.AddWithValue("@price", basePrice);
+                    insertDetailCmd.ExecuteNonQuery();
+                }
+
+                transaction.Commit();
+                return ticketId;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error creating ticket with seats: " + ex.Message);
+                try
+                {
+                    transaction?.Rollback();
+                }
+                catch
+                {
+                }
+
+                return -1;
             }
             finally
             {

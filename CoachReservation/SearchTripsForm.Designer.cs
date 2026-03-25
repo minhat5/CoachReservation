@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             groupBox1 = new GroupBox();
-            SearchTrip = new Button();
+            btnSearch = new Button();
             comboBox1 = new ComboBox();
             label4 = new Label();
             dtpDeparture = new DateTimePicker();
@@ -54,7 +54,7 @@
             // 
             // groupBox1
             // 
-            groupBox1.Controls.Add(SearchTrip);
+            groupBox1.Controls.Add(btnSearch);
             groupBox1.Controls.Add(comboBox1);
             groupBox1.Controls.Add(label4);
             groupBox1.Controls.Add(dtpDeparture);
@@ -70,21 +70,22 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Tìm kiếm chuyến xe";
             // 
-            // SearchTrip
+            // btnSearch
             // 
-            SearchTrip.BackColor = Color.Green;
-            SearchTrip.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            SearchTrip.ForeColor = Color.White;
-            SearchTrip.Location = new Point(21, 225);
-            SearchTrip.Name = "SearchTrip";
-            SearchTrip.Size = new Size(507, 38);
-            SearchTrip.TabIndex = 6;
-            SearchTrip.Text = "TÌM CHUYẾN XE";
-            SearchTrip.UseVisualStyleBackColor = false;
-            SearchTrip.Click += SearchTrip_Click;
+            btnSearch.BackColor = Color.Green;
+            btnSearch.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnSearch.ForeColor = Color.White;
+            btnSearch.Location = new Point(21, 225);
+            btnSearch.Name = "btnSearch";
+            btnSearch.Size = new Size(507, 38);
+            btnSearch.TabIndex = 6;
+            btnSearch.Text = "TÌM CHUYẾN XE";
+            btnSearch.UseVisualStyleBackColor = false;
+            btnSearch.Click += SearchTrip;
             // 
             // comboBox1
             // 
+            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox1.FormattingEnabled = true;
             comboBox1.Location = new Point(118, 180);
             comboBox1.Name = "comboBox1";
@@ -103,7 +104,7 @@
             // dtpDeparture
             // 
             dtpDeparture.Location = new Point(118, 133);
-            dtpDeparture.MinDate = new DateTime(2026, 3, 24, 0, 0, 0, 0);
+            dtpDeparture.MinDate = new DateTime(2026, 3, 1, 0, 0, 0, 0);
             dtpDeparture.Name = "dtpDeparture";
             dtpDeparture.Size = new Size(410, 23);
             dtpDeparture.TabIndex = 5;
@@ -120,6 +121,7 @@
             // 
             // cbDestination
             // 
+            cbDestination.DropDownStyle = ComboBoxStyle.DropDownList;
             cbDestination.FormattingEnabled = true;
             cbDestination.Location = new Point(118, 86);
             cbDestination.Name = "cbDestination";
@@ -137,6 +139,7 @@
             // 
             // cbDeparture
             // 
+            cbDeparture.DropDownStyle = ComboBoxStyle.DropDownList;
             cbDeparture.FormattingEnabled = true;
             cbDeparture.Location = new Point(118, 39);
             cbDeparture.Name = "cbDeparture";
@@ -238,7 +241,7 @@
 
         private GroupBox groupBox1;
         private Label label1;
-        private Button SearchTrip;
+        private Button btnSearch;
         private ComboBox comboBox1;
         private Label label4;
         private DateTimePicker dtpDeparture;

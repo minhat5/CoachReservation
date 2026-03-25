@@ -15,6 +15,32 @@ namespace CoachReservation
         private int columnIndex;
         private string seatType;
 
+        public Seat(string seatCode, string seatType)
+        {
+            this.seatCode = seatCode;
+            this.seatType = seatType;
+        }
+
+        public Seat(SeatMap seatMap, string seatCode, int floor, int rowIndex, int columnIndex, string seatType)
+        {
+            this.seatMap = seatMap;
+            this.seatCode = seatCode;
+            this.floor = floor;
+            this.rowIndex = rowIndex;
+            this.columnIndex = columnIndex;
+            this.seatType = seatType;
+        }
+
+        public Seat(int seatId, string seatCode, int floor, int rowIndex, int columnIndex, string seatType)
+        {
+            this.seatId = seatId;
+            this.seatCode = seatCode;
+            this.floor = floor;
+            this.rowIndex = rowIndex;
+            this.columnIndex = columnIndex;
+            this.seatType = seatType;
+        }
+
         public int SeatId { get => seatId; set => seatId = value; }
         public string SeatCode { get => seatCode; set => seatCode = value; }
         public int Floor { get => floor; set => floor = value; }

@@ -27,12 +27,7 @@ namespace CoachReservation
 
                 while (reader.Read())
                 {
-                    Vehicle vehicle = new Vehicle
-                    {
-                        VehicleId = reader.GetInt32("VehicleId"),
-                        LicensePlate = reader.GetString("LicensePlate"),
-                        VehicleType = reader.GetString("VehicleType")
-                    };
+                    Vehicle vehicle = new Vehicle(reader.GetInt32("VehicleId"), reader.GetString("LicensePlate"), reader.GetString("VehicleType"));
                     vehicles.Add(vehicle);
                 }
 
@@ -86,12 +81,7 @@ namespace CoachReservation
                 MySqlDataReader reader = cmd.ExecuteReader();
                 if (reader.Read())
                 {
-                    Vehicle vehicle = new Vehicle
-                    {
-                        VehicleId = reader.GetInt32("VehicleId"),
-                        LicensePlate = reader.GetString("LicensePlate"),
-                        VehicleType = reader.GetString("VehicleType")
-                    };
+                    Vehicle vehicle = new Vehicle(reader.GetInt32("VehicleId"), reader.GetString("LicensePlate"), reader.GetString("VehicleType"));
                     reader.Close();
                     return vehicle;
                 }

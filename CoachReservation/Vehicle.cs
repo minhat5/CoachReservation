@@ -13,6 +13,22 @@ namespace CoachReservation
         private string vehicleType;
         private int totalSeats;
 
+        public Vehicle(int vehicleId)
+        {
+            this.vehicleId = vehicleId;
+        }
+
+        public Vehicle(int vehicleId, string licensePlate, string vehicleType) : this(vehicleId)
+        {
+            this.licensePlate = licensePlate;
+            this.vehicleType = vehicleType;
+        }
+
+        public Vehicle(int vehicleId, string licensePlate, string vehicleType, int totalSeats) : this(vehicleId, licensePlate, vehicleType)
+        {
+            this.totalSeats = totalSeats;
+        }
+
         public int VehicleId { get => vehicleId; set => vehicleId = value; }
         public string LicensePlate { get => licensePlate; set => licensePlate = value; }
         public string VehicleType { get => vehicleType; set => vehicleType = value; }
