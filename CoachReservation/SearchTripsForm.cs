@@ -16,21 +16,29 @@ namespace CoachReservation
         private RouteCatalog routeCatalog;
         private VehicleCatalog vehicleCatalog;
         private TripCatalog tripCatalog;
+        private SeatMapCatalog seatMapCatalog;
+        private SeatCatalog seatCatalog;
+        private TicketCatalog ticketCatalog;
         private List<Trip> searchResults;
 
-        public SearchTripsForm(RouteCatalog routeCatalog, VehicleCatalog vehicleCatalog, TripCatalog tripCatalog)
+        public SearchTripsForm(RouteCatalog routeCatalog, VehicleCatalog vehicleCatalog, TripCatalog tripCatalog, SeatMapCatalog seatMapCatalog, SeatCatalog seatCatalog, TicketCatalog ticketCatalog)
         {
             this.routeCatalog = routeCatalog;
             this.vehicleCatalog = vehicleCatalog;
             this.tripCatalog = tripCatalog;
+            this.seatMapCatalog = seatMapCatalog;
+            this.seatCatalog = seatCatalog;
+            this.ticketCatalog = ticketCatalog;
             this.searchResults = new List<Trip>();
             InitializeComponent();
+
         }
 
-        private void SearchTrip_Click(object sender, EventArgs e)
+        private void SearchTrip(object sender, EventArgs e)
         {
-            if (!ValidateSearchInput())
+            if (dtpDeparture.Value.Date < DateTime.Now.Date)
             {
+                DisplayError("Vui lòng chọn ngày trong tương lai!");
                 return;
             }
 
@@ -70,35 +78,6 @@ namespace CoachReservation
             DisplaySearchResults();
         }
 
-        private bool ValidateSearchInput()
-        {
-            if (cbDeparture.SelectedItem == null)
-            {
-                DisplayError("Vui lòng chọn điểm đi!");
-                return false;
-            }
-
-            if (cbDestination.SelectedItem == null)
-            {
-                DisplayError("Vui lòng chọn điểm đến!");
-                return false;
-            }
-
-            if (dtpDeparture.Value.Date < DateTime.Now.Date)
-            {
-                DisplayError("Vui lòng chọn ngày trong tương lai!");
-                return false;
-            }
-
-            if (comboBox1.SelectedItem == null)
-            {
-                DisplayError("Vui lòng chọn số ghế!");
-                return false;
-            }
-
-            return true;
-        }
-
         private void DisplayError(string message)
         {
             MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -119,16 +98,16 @@ namespace CoachReservation
                     trip.Vehicle.VehicleType,
                     trip.BasePrice.ToString("C"),
                     emptySeats,
-                    "Chọn"
+                    "Đặt vé"
                 );
 
                 dataGridView1.Rows[rowIndex].Tag = trip.TripId;
             }
 
-            dataGridView1.CellClick += DataGridView1_CellClick;
+            dataGridView1.CellClick += BookTicket;
         }
 
-        private void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void BookTicket(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == 6 && e.RowIndex >= 0)
             {
@@ -137,8 +116,8 @@ namespace CoachReservation
 
                 if (selectedTrip != null)
                 {
-                    MessageBox.Show($"Bạn đã chọn chuyến xe từ {selectedTrip.Route.DeparturePoint} đến {selectedTrip.Route.Destination} lúc {selectedTrip.DepartureTime:hh\\:mm}", "Thông báo");
-                    // TODO: Chuyển sang form đặt vé
+                    BookTicketForm bookTicketForm = new BookTicketForm(selectedTrip, tripCatalog, seatMapCatalog, seatCatalog, ticketCatalog);
+                    bookTicketForm.ShowDialog();
                 }
             }
         }

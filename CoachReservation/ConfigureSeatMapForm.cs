@@ -15,19 +15,20 @@ namespace CoachReservation
     {
         private SeatMapCatalog seatMapCatalog;
         private VehicleCatalog vehicleCatalog;
+        private SeatCatalog seatCatalog;
         private SeatMap currentSeatMap;
-        private Dictionary<int, List<Button>> seatGrids; // floor -> buttons
+        private Dictionary<int, List<Button>> seatGrids;
         private Button selectedSeatButton;
         private Seat selectedSeat;
 
-        public ConfigureSeatMapForm(SeatMapCatalog seatMapCatalog, VehicleCatalog vehicleCatalog)
+        public ConfigureSeatMapForm(SeatMapCatalog seatMapCatalog, VehicleCatalog vehicleCatalog, SeatCatalog seatCatalog)
         {
             this.seatMapCatalog = seatMapCatalog;
             this.vehicleCatalog = vehicleCatalog;
+            this.seatCatalog = seatCatalog;
             seatGrids = new Dictionary<int, List<Button>>();
             InitializeComponent();
             LoadVehicles();
-            SetupEventHandlers();
         }
 
         private void LoadVehicles()
@@ -45,18 +46,21 @@ namespace CoachReservation
             }
         }
 
-        private void SetupEventHandlers()
+        private void DisplayError(string message)
         {
-            InitSeatGrid.Click += InitSeatGrid_Click;
-            SaveSeatConfiguration.Click += SaveSeatConfiguration_Click;
-            SaveSelection.Click += SaveSelection_Click;
+            MessageBox.Show(message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        private void InitSeatGrid_Click(object sender, EventArgs e)
+        private void DisplayInfo(string message)
+        {
+            MessageBox.Show(message, "Thông tin", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void InitSeatGrid(object sender, EventArgs e)
         {
             if (cbVehicle.SelectedValue == null)
             {
-                MessageBox.Show("Vui lòng chọn phương tiện");
+                DisplayError("Vui lòng chọn phương tiện");
                 return;
             }
 
@@ -78,7 +82,7 @@ namespace CoachReservation
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khởi tạo lưới ghế: " + ex.Message);
+                DisplayError("Lỗi khởi tạo lưới ghế: " + ex.Message);
             }
         }
 
@@ -89,7 +93,7 @@ namespace CoachReservation
             seatGrids.Clear();
 
             // Create tabs for each floor
-            List<Seat> allSeats = seatMapCatalog.GetSeatsBySeatMapId(seatMap.SeatMapId);
+            List<Seat> allSeats = seatCatalog.GetSeatsBySeatMapId(seatMap.SeatMapId);
 
             for (int floor = 1; floor <= seatMap.Floors; floor++)
             {
@@ -118,6 +122,11 @@ namespace CoachReservation
                         Seat seat = allSeats.FirstOrDefault(s => 
                             s.Floor == floor && s.RowIndex == row && s.ColumnIndex == col);
 
+                        if (seat == null)
+                        {
+                            seat = new Seat(seatMap, "", floor, row, col, "");
+                        }
+
                         Button seatButton = CreateSeatButton(seat);
                         tableLayout.Controls.Add(seatButton, col, row);
                         floorSeats.Add(seatButton);
@@ -138,7 +147,7 @@ namespace CoachReservation
 
             if (floors <= 0 || columns <= 0 || rows <= 0)
             {
-                MessageBox.Show("Vui lòng nhập số tầng, dãy và hàng > 0");
+                DisplayError("Vui lòng nhập số tầng, dãy và hàng > 0");
                 return;
             }
 
@@ -146,18 +155,12 @@ namespace CoachReservation
             Vehicle selectedVehicle = vehicleCatalog.GetVehicleById(vehicleId);
             if (selectedVehicle == null)
             {
-                MessageBox.Show("Không tìm thấy phương tiện");
+                DisplayError("Không tìm thấy phương tiện");
                 return;
             }
 
             // Create SeatMap object
-            currentSeatMap = new SeatMap
-            {
-                Vehicle = selectedVehicle,
-                Floors = floors,
-                GridColumns = columns,
-                GridRows = rows
-            };
+            currentSeatMap = new SeatMap(selectedVehicle, floors, columns, rows);
 
             // Clear existing tabs
             tabControlFloors.TabPages.Clear();
@@ -188,15 +191,7 @@ namespace CoachReservation
                             tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / columns));
                         }
 
-                        Seat newSeat = new Seat
-                        {
-                            SeatMap = currentSeatMap,
-                            Floor = floor,
-                            RowIndex = row,
-                            ColumnIndex = col,
-                            SeatCode = "",
-                            SeatType = ""
-                        };
+                        Seat newSeat = new Seat(currentSeatMap, "", floor, row, col, "");
 
                         Button seatButton = CreateSeatButton(newSeat);
                         tableLayout.Controls.Add(seatButton, col, row);
@@ -215,11 +210,7 @@ namespace CoachReservation
             // Create a default seat if null
             if (seat == null)
             {
-                seat = new Seat
-                {
-                    SeatCode = "",
-                    SeatType = ""
-                };
+                seat = new Seat("", "");
             }
 
             Button button = new Button
@@ -242,11 +233,11 @@ namespace CoachReservation
                 button.BackColor = Color.White;
             }
 
-            button.Click += SeatButton_Click;
+            button.Click += SeatButton;
             return button;
         }
 
-        private void SeatButton_Click(object sender, EventArgs e)
+        private void SeatButton(object sender, EventArgs e)
         {
             Button button = sender as Button;
             if (button?.Tag is Seat seat)
@@ -260,11 +251,11 @@ namespace CoachReservation
             }
         }
 
-        private void SaveSelection_Click(object sender, EventArgs e)
+        private void SaveSelection(object sender, EventArgs e)
         {
             if (selectedSeat == null)
             {
-                MessageBox.Show("Vui lòng chọn một ghế");
+                DisplayError("Vui lòng chọn một ghế");
                 return;
             }
 
@@ -285,33 +276,24 @@ namespace CoachReservation
                     selectedSeatButton.BackColor = Color.White;
                 }
 
-                MessageBox.Show("Lưu ô thành công");
+                DisplayInfo("Lưu ô thành công");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi lưu ô: " + ex.Message);
+                DisplayError("Lỗi lưu ô: " + ex.Message);
             }
         }
 
-        private void SaveSeatConfiguration_Click(object sender, EventArgs e)
+        private void SaveSeatConfiguration(object sender, EventArgs e)
         {
             if (currentSeatMap == null)
             {
-                MessageBox.Show("Vui lòng khởi tạo lưới ghế trước");
+                DisplayError("Vui lòng khởi tạo lưới ghế trước");
                 return;
             }
 
             try
             {
-                // Save seat map to database
-                int seatMapId = seatMapCatalog.SaveSeatMap(currentSeatMap);
-                if (seatMapId <= 0)
-                {
-                    MessageBox.Show("Lỗi lưu sơ đồ ghế");
-                    return;
-                }
-                currentSeatMap.SeatMapId = seatMapId;
-
                 // Collect all seats from the grid
                 List<Seat> allSeats = new List<Seat>();
                 foreach (var kvp in seatGrids)
@@ -326,14 +308,63 @@ namespace CoachReservation
                     }
                 }
 
-                // Save all seats to database
-                seatMapCatalog.SaveSeats(allSeats);
+                // Validate seat codes before saving
+                var duplicateSeatCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var seenSeatCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var emptySeats = new List<string>();
 
-                MessageBox.Show("Lưu cấu hình ghế thành công");
+                foreach (var seat in allSeats)
+                {
+                    bool isWalkway = string.Equals(seat.SeatType, "Lối đi", StringComparison.OrdinalIgnoreCase);
+                    string normalizedCode = (seat.SeatCode ?? string.Empty).Trim();
+
+                    if (isWalkway)
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(normalizedCode))
+                    {
+                        emptySeats.Add($"Tầng {seat.Floor} - Hàng {seat.RowIndex + 1} - Cột {seat.ColumnIndex + 1}");
+                        continue;
+                    }
+
+                    if (!seenSeatCodes.Add(normalizedCode))
+                    {
+                        duplicateSeatCodes.Add(normalizedCode);
+                    }
+
+                    seat.SeatCode = normalizedCode;
+                }
+
+                if (emptySeats.Count > 0)
+                {
+                    DisplayError("Có ghế chưa nhập mã:\n" + string.Join("\n", emptySeats));
+                    return;
+                }
+
+                if (duplicateSeatCodes.Count > 0)
+                {
+                    DisplayError("Mã ghế bị trùng: " + string.Join(", ", duplicateSeatCodes));
+                    return;
+                }
+
+                // Save seat map to database
+                int seatMapId = seatMapCatalog.SaveSeatMap(currentSeatMap);
+                if (seatMapId <= 0)
+                {
+                    DisplayError("Lỗi lưu sơ đồ ghế");
+                    return;
+                }
+                currentSeatMap.SeatMapId = seatMapId;
+
+                // Save all seats to database
+                seatCatalog.SaveSeats(allSeats);
+                DisplayInfo("Lưu cấu hình ghế thành công");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi lưu cấu hình: " + ex.Message);
+                DisplayError("Lỗi lưu cấu hình: " + ex.Message);
             }
         }
     }

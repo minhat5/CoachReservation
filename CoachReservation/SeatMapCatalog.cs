@@ -28,14 +28,7 @@ namespace CoachReservation
                 MySqlDataReader reader = cmd.ExecuteReader();
                 if (reader.Read())
                 {
-                    SeatMap seatMap = new SeatMap
-                    {
-                        SeatMapId = reader.GetInt32(0),
-                        Floors = reader.GetInt32(2),
-                        GridColumns = reader.GetInt32(3),
-                        GridRows = reader.GetInt32(4),
-                        Vehicle = new Vehicle { VehicleId = vehicleId }
-                    };
+                    SeatMap seatMap = new SeatMap(reader.GetInt32(0), new Vehicle(vehicleId), reader.GetInt32(2), reader.GetInt32(3), reader.GetInt32(4));
                     reader.Close();
                     return seatMap;
                 }
@@ -44,47 +37,7 @@ namespace CoachReservation
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error getting seat map: " + ex.Message);
                 return null;
-            }
-            finally
-            {
-                database.CloseDatabase();
-            }
-        }
-
-        public List<Seat> GetSeatsBySeatMapId(int seatMapId)
-        {
-            List<Seat> seats = new List<Seat>();
-            try
-            {
-                database.OpenDatabase();
-                string query = @"SELECT SeatId, SeatCode, Floor, RowIndex, ColumnIndex, SeatType 
-                               FROM Seat WHERE SeatMapId = @seatMapId";
-                MySqlCommand cmd = new MySqlCommand(query, database.SqlConn);
-                cmd.Parameters.AddWithValue("@seatMapId", seatMapId);
-
-                MySqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
-                {
-                    Seat seat = new Seat
-                    {
-                        SeatId = reader.GetInt32(0),
-                        SeatCode = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                        Floor = reader.GetInt32(2),
-                        RowIndex = reader.GetInt32(3),
-                        ColumnIndex = reader.GetInt32(4),
-                        SeatType = reader.IsDBNull(5) ? "" : reader.GetString(5)
-                    };
-                    seats.Add(seat);
-                }
-                reader.Close();
-                return seats;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error getting seats: " + ex.Message);
-                return new List<Seat>();
             }
             finally
             {
@@ -138,65 +91,7 @@ namespace CoachReservation
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error saving seat map: " + ex.Message);
                 return -1;
-            }
-            finally
-            {
-                database.CloseDatabase();
-            }
-        }
-
-        public void SaveSeats(List<Seat> seats)
-        {
-            try
-            {
-                database.OpenDatabase();
-                foreach (var seat in seats)
-                {
-                    // Check if seat already exists
-                    string checkQuery = @"SELECT SeatId FROM Seat 
-                                         WHERE SeatMapId = @seatMapId AND Floor = @floor 
-                                         AND RowIndex = @rowIndex AND ColumnIndex = @columnIndex";
-                    MySqlCommand checkCmd = new MySqlCommand(checkQuery, database.SqlConn);
-                    checkCmd.Parameters.AddWithValue("@seatMapId", seat.SeatMap.SeatMapId);
-                    checkCmd.Parameters.AddWithValue("@floor", seat.Floor);
-                    checkCmd.Parameters.AddWithValue("@rowIndex", seat.RowIndex);
-                    checkCmd.Parameters.AddWithValue("@columnIndex", seat.ColumnIndex);
-
-                    object result = checkCmd.ExecuteScalar();
-
-                    if (result != null)
-                    {
-                        // Update existing seat
-                        int seatId = Convert.ToInt32(result);
-                        string updateQuery = @"UPDATE Seat SET SeatCode = @seatCode, SeatType = @seatType 
-                                            WHERE SeatId = @seatId";
-                        MySqlCommand updateCmd = new MySqlCommand(updateQuery, database.SqlConn);
-                        updateCmd.Parameters.AddWithValue("@seatCode", seat.SeatCode ?? "");
-                        updateCmd.Parameters.AddWithValue("@seatType", seat.SeatType ?? "");
-                        updateCmd.Parameters.AddWithValue("@seatId", seatId);
-                        updateCmd.ExecuteNonQuery();
-                    }
-                    else
-                    {
-                        // Insert new seat
-                        string insertQuery = @"INSERT INTO Seat (SeatMapId, SeatCode, Floor, RowIndex, ColumnIndex, SeatType) 
-                                             VALUES (@seatMapId, @seatCode, @floor, @rowIndex, @columnIndex, @seatType)";
-                        MySqlCommand insertCmd = new MySqlCommand(insertQuery, database.SqlConn);
-                        insertCmd.Parameters.AddWithValue("@seatMapId", seat.SeatMap.SeatMapId);
-                        insertCmd.Parameters.AddWithValue("@seatCode", seat.SeatCode ?? "");
-                        insertCmd.Parameters.AddWithValue("@floor", seat.Floor);
-                        insertCmd.Parameters.AddWithValue("@rowIndex", seat.RowIndex);
-                        insertCmd.Parameters.AddWithValue("@columnIndex", seat.ColumnIndex);
-                        insertCmd.Parameters.AddWithValue("@seatType", seat.SeatType ?? "");
-                        insertCmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error saving seats: " + ex.Message);
             }
             finally
             {

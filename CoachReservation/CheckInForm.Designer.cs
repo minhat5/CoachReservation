@@ -29,11 +29,11 @@
         private void InitializeComponent()
         {
             groupBox1 = new GroupBox();
-            FindTicket = new Button();
+            btnFind = new Button();
             txtFind = new TextBox();
             label1 = new Label();
             groupBox2 = new GroupBox();
-            CheckIn = new Button();
+            btnCheckIn = new Button();
             txtStatus = new TextBox();
             label10 = new Label();
             txtTotal = new TextBox();
@@ -58,7 +58,7 @@
             // 
             // groupBox1
             // 
-            groupBox1.Controls.Add(FindTicket);
+            groupBox1.Controls.Add(btnFind);
             groupBox1.Controls.Add(txtFind);
             groupBox1.Controls.Add(label1);
             groupBox1.Location = new Point(12, 12);
@@ -68,15 +68,15 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Tìm kiếm vé";
             // 
-            // FindTicket
+            // btnFind
             // 
-            FindTicket.Location = new Point(451, 29);
-            FindTicket.Name = "FindTicket";
-            FindTicket.Size = new Size(89, 23);
-            FindTicket.TabIndex = 2;
-            FindTicket.Text = "Tìm vé";
-            FindTicket.UseVisualStyleBackColor = true;
-            FindTicket.Click += FindTicket_Click;
+            btnFind.Location = new Point(451, 29);
+            btnFind.Name = "btnFind";
+            btnFind.Size = new Size(89, 23);
+            btnFind.TabIndex = 2;
+            btnFind.Text = "Tìm vé";
+            btnFind.UseVisualStyleBackColor = true;
+            btnFind.Click += FindTicket;
             // 
             // txtFind
             // 
@@ -96,7 +96,7 @@
             // 
             // groupBox2
             // 
-            groupBox2.Controls.Add(CheckIn);
+            groupBox2.Controls.Add(btnCheckIn);
             groupBox2.Controls.Add(txtStatus);
             groupBox2.Controls.Add(label10);
             groupBox2.Controls.Add(txtTotal);
@@ -123,18 +123,18 @@
             groupBox2.Text = "Thông tin chi tiết vé";
             groupBox2.Visible = false;
             // 
-            // CheckIn
+            // btnCheckIn
             // 
-            CheckIn.BackColor = Color.Green;
-            CheckIn.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            CheckIn.ForeColor = SystemColors.ButtonFace;
-            CheckIn.Location = new Point(13, 420);
-            CheckIn.Name = "CheckIn";
-            CheckIn.Size = new Size(503, 59);
-            CheckIn.TabIndex = 18;
-            CheckIn.Text = "XÁC NHẬN LÊN XE";
-            CheckIn.UseVisualStyleBackColor = false;
-            CheckIn.Click += CheckIn_Click;
+            btnCheckIn.BackColor = Color.Green;
+            btnCheckIn.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnCheckIn.ForeColor = SystemColors.ButtonFace;
+            btnCheckIn.Location = new Point(13, 420);
+            btnCheckIn.Name = "btnCheckIn";
+            btnCheckIn.Size = new Size(503, 59);
+            btnCheckIn.TabIndex = 18;
+            btnCheckIn.Text = "XÁC NHẬN LÊN XE";
+            btnCheckIn.UseVisualStyleBackColor = false;
+            btnCheckIn.Click += CheckIn;
             // 
             // txtStatus
             // 
@@ -308,7 +308,7 @@
         #endregion
 
         private GroupBox groupBox1;
-        private Button FindTicket;
+        private Button btnFind;
         private TextBox txtFind;
         private Label label1;
         private GroupBox groupBox2;
@@ -326,7 +326,7 @@
         private Label label7;
         private TextBox txtLicensePlate;
         private Label label6;
-        private Button CheckIn;
+        private Button btnCheckIn;
         private TextBox txtStatus;
         private Label label10;
         private TextBox txtTotal;

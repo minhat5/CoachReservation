@@ -13,6 +13,23 @@ namespace CoachReservation
         private int gridColumns;
         private int gridRows;
 
+        public SeatMap(Vehicle vehicle, int floors, int gridColumns, int gridRows)
+        {
+            this.vehicle = vehicle;
+            this.floors = floors;
+            this.gridColumns = gridColumns;
+            this.gridRows = gridRows;
+        }
+
+        public SeatMap(int seatMapId, Vehicle vehicle, int floors, int gridColumns, int gridRows)
+        {
+            this.seatMapId = seatMapId;
+            this.vehicle = vehicle;
+            this.floors = floors;
+            this.gridColumns = gridColumns;
+            this.gridRows = gridRows;
+        }
+
         public int SeatMapId { get => seatMapId; set => seatMapId = value; }
         public int Floors { get => floors; set => floors = value; }
         public int GridColumns { get => gridColumns; set => gridColumns = value; }

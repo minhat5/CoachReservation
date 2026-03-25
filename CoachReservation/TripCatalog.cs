@@ -41,51 +41,24 @@ namespace CoachReservation
                 cmd.Parameters.AddWithValue("@destination", destination);
                 cmd.Parameters.AddWithValue("@departureDate", departureDate.Date);
 
-                Console.WriteLine($"DEBUG: Searching trips with departure='{departurePoint}', destination='{destination}', date='{departureDate.Date:yyyy-MM-dd}', after current time");
-                Console.WriteLine($"DEBUG: Current time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-
                 MySqlDataReader reader = cmd.ExecuteReader();
 
                 while (reader.Read())
                 {
-                    Route route = new Route
-                    {
-                        RouteId = reader.GetInt32("RouteId"),
-                        DeparturePoint = reader.GetString("DeparturePoint"),
-                        Destination = reader.GetString("Destination")
-                    };
+                    Route route = new Route(reader.GetInt32("RouteId"), reader.GetString("DeparturePoint"), reader.GetString("Destination"));
 
-                    Vehicle vehicle = new Vehicle
-                    {
-                        VehicleId = reader.GetInt32("VehicleId"),
-                        LicensePlate = reader.GetString("LicensePlate"),
-                        VehicleType = reader.GetString("VehicleType"),
-                        TotalSeats = reader.GetInt32("TotalSeats")
-                    };
+                    Vehicle vehicle = new Vehicle(reader.GetInt32("VehicleId"), reader.GetString("LicensePlate"), reader.GetString("VehicleType"), reader.GetInt32("TotalSeats"));
 
-                    Trip trip = new Trip
-                    {
-                        TripId = reader.GetInt32("TripId"),
-                        DepartureDate = reader.GetDateTime("DepartureDate"),
-                        DepartureTime = reader.GetTimeSpan("DepartureTime"),
-                        BasePrice = reader.GetDecimal("BasePrice"),
-                        Status = reader.GetString("Status"),
-                        Route = route,
-                        Vehicle = vehicle
-                    };
+                    Trip trip = new Trip(reader.GetInt32("TripId"), route, vehicle, reader.GetDateTime("DepartureDate"), reader.GetTimeSpan("DepartureTime"), reader.GetDecimal("BasePrice"), reader.GetString("Status"));
 
                     trips.Add(trip);
-                    Console.WriteLine($"DEBUG: Found trip {trip.TripId} - {trip.Route.DeparturePoint} -> {trip.Route.Destination} at {trip.DepartureTime:hh\\:mm\\:ss}");
                 }
 
-                Console.WriteLine($"DEBUG: Total trips found: {trips.Count}");
                 reader.Close();
                 return trips;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error searching trips: " + ex.Message);
-                Console.WriteLine("Stack trace: " + ex.StackTrace);
                 return new List<Trip>();
             }
             finally
@@ -119,7 +92,6 @@ namespace CoachReservation
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error getting empty seats: " + ex.Message);
                 return 0;
             }
         }

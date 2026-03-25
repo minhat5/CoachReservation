@@ -21,7 +21,7 @@ namespace CoachReservation
             InitializeComponent();
         }
 
-        private void FindTicket_Click(object sender, EventArgs e)
+        private void FindTicket(object sender, EventArgs e)
         {
             if (!Validate())
             {
@@ -96,7 +96,7 @@ namespace CoachReservation
             txtStatus.Text = "";
             txtSeat.Text = "";
         }
-        private void CheckIn_Click(object sender, EventArgs e)
+        private void CheckIn(object sender, EventArgs e)
         {
             ticket.TicketStatus = "Đã lên xe";
             try

@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             groupBox1 = new GroupBox();
-            InitSeatGrid = new Button();
+            btnInit = new Button();
             nbRow = new NumericUpDown();
             label4 = new Label();
             nbColumn = new NumericUpDown();
@@ -39,13 +39,13 @@
             cbVehicle = new ComboBox();
             label1 = new Label();
             groupBox2 = new GroupBox();
+            btnSave = new Button();
             txtSeatCode = new TextBox();
             label6 = new Label();
             cbType = new ComboBox();
             label5 = new Label();
-            SaveSeatConfiguration = new Button();
+            btnSaveConfiguration = new Button();
             groupBox3 = new GroupBox();
-            SaveSelection = new Button();
             tabControlFloors = new TabControl();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nbRow).BeginInit();
@@ -57,7 +57,7 @@
             // 
             // groupBox1
             // 
-            groupBox1.Controls.Add(InitSeatGrid);
+            groupBox1.Controls.Add(btnInit);
             groupBox1.Controls.Add(nbRow);
             groupBox1.Controls.Add(label4);
             groupBox1.Controls.Add(nbColumn);
@@ -73,14 +73,15 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "THÔNG TIN KHỞI TẠO";
             // 
-            // InitSeatGrid
+            // btnInit
             // 
-            InitSeatGrid.Location = new Point(6, 218);
-            InitSeatGrid.Name = "InitSeatGrid";
-            InitSeatGrid.Size = new Size(363, 32);
-            InitSeatGrid.TabIndex = 8;
-            InitSeatGrid.Text = "Khởi tạo lưới ghế";
-            InitSeatGrid.UseVisualStyleBackColor = true;
+            btnInit.Location = new Point(6, 218);
+            btnInit.Name = "btnInit";
+            btnInit.Size = new Size(363, 32);
+            btnInit.TabIndex = 8;
+            btnInit.Text = "Khởi tạo lưới ghế";
+            btnInit.UseVisualStyleBackColor = true;
+            btnInit.Click += InitSeatGrid;
             // 
             // nbRow
             // 
@@ -149,7 +150,7 @@
             // 
             // groupBox2
             // 
-            groupBox2.Controls.Add(SaveSelection);
+            groupBox2.Controls.Add(btnSave);
             groupBox2.Controls.Add(txtSeatCode);
             groupBox2.Controls.Add(label6);
             groupBox2.Controls.Add(cbType);
@@ -160,6 +161,16 @@
             groupBox2.TabIndex = 1;
             groupBox2.TabStop = false;
             groupBox2.Text = "THUỘC TÍNH Ô ĐANG CHỌN";
+            // 
+            // btnSave
+            // 
+            btnSave.Location = new Point(6, 121);
+            btnSave.Name = "btnSave";
+            btnSave.Size = new Size(363, 34);
+            btnSave.TabIndex = 4;
+            btnSave.Text = "Lưu ô";
+            btnSave.UseVisualStyleBackColor = true;
+            btnSave.Click += SaveSelection;
             // 
             // txtSeatCode
             // 
@@ -195,19 +206,20 @@
             label5.TabIndex = 0;
             label5.Text = "Loại";
             // 
-            // SaveSeatConfiguration
+            // btnSaveConfiguration
             // 
-            SaveSeatConfiguration.Location = new Point(6, 385);
-            SaveSeatConfiguration.Name = "SaveSeatConfiguration";
-            SaveSeatConfiguration.Size = new Size(383, 34);
-            SaveSeatConfiguration.TabIndex = 4;
-            SaveSeatConfiguration.Text = "Lưu cấu hình";
-            SaveSeatConfiguration.UseVisualStyleBackColor = true;
+            btnSaveConfiguration.Location = new Point(6, 385);
+            btnSaveConfiguration.Name = "btnSaveConfiguration";
+            btnSaveConfiguration.Size = new Size(383, 34);
+            btnSaveConfiguration.TabIndex = 4;
+            btnSaveConfiguration.Text = "Lưu cấu hình";
+            btnSaveConfiguration.UseVisualStyleBackColor = true;
+            btnSaveConfiguration.Click += SaveSeatConfiguration;
             // 
             // groupBox3
             // 
             groupBox3.Controls.Add(tabControlFloors);
-            groupBox3.Controls.Add(SaveSeatConfiguration);
+            groupBox3.Controls.Add(btnSaveConfiguration);
             groupBox3.Location = new Point(393, 18);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(395, 423);
@@ -222,15 +234,6 @@
             tabControlFloors.SelectedIndex = 0;
             tabControlFloors.Size = new Size(383, 355);
             tabControlFloors.TabIndex = 5;
-            // 
-            // SaveSelection
-            // 
-            SaveSelection.Location = new Point(6, 121);
-            SaveSelection.Name = "SaveSelection";
-            SaveSelection.Size = new Size(363, 34);
-            SaveSelection.TabIndex = 4;
-            SaveSelection.Text = "Lưu ô";
-            SaveSelection.UseVisualStyleBackColor = true;
             // 
             // ConfigureSeatMapForm
             // 
@@ -258,7 +261,7 @@
         private GroupBox groupBox1;
         private ComboBox cbVehicle;
         private Label label1;
-        private Button InitSeatGrid;
+        private Button btnInit;
         private NumericUpDown nbRow;
         private Label label4;
         private NumericUpDown nbColumn;
@@ -270,8 +273,8 @@
         private TextBox txtSeatCode;
         private Label label6;
         private ComboBox cbType;
-        private Button SaveSelection;
-        private Button SaveSeatConfiguration;
+        private Button btnSave;
+        private Button btnSaveConfiguration;
         private GroupBox groupBox3;
         private TabControl tabControlFloors;
     }
