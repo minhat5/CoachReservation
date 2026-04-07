@@ -17,9 +17,9 @@ namespace CoachReservation
             TicketCatalog ticketCatalog = new TicketCatalog();
             SeatCatalog seatCatalog = new SeatCatalog();
             ApplicationConfiguration.Initialize();
-            //Application.Run(new ConfigureSeatMapForm(seatMapCatalog, vehicleCatalog, seatCatalog));
+            Application.Run(new ConfigureSeatMapForm(seatMapCatalog, vehicleCatalog, seatCatalog));
             //Application.Run(new SearchTripsForm(routeCatalog, vehicleCatalog, tripCatalog, seatMapCatalog, seatCatalog, ticketCatalog));
-            Application.Run(new CheckInForm(ticketCatalog));
+            //Application.Run(new CheckInForm(ticketCatalog));
         }
     }
 }
