@@ -36,7 +36,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="CoachReservation.TripSeat">
-    <Position X="7.75" Y="3.25" Width="1.5" />
+    <Position X="7.75" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ABQAAAAUEAAAABBAAAAAQAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>TripSeat.cs</FileName>

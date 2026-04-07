@@ -148,12 +148,7 @@ namespace CoachReservation
                             string fullName = reader.GetString("FullName");
                             string phoneNumber = reader.GetString("PhoneNumber");
 
-                            passenger = new Passenger
-                            {
-                                PassengerId = psgId,
-                                FullName = fullName,
-                                PhoneNumber = phoneNumber
-                            };
+                            passenger = new Passenger(psgId, fullName, phoneNumber);
                         }
 
                         reader.Close();
