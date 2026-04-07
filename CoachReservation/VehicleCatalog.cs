@@ -9,10 +9,9 @@ namespace CoachReservation
 {
     public class VehicleCatalog
     {
-        private Database database;
-        public VehicleCatalog(Database database)
+        private string connectionString = "server=localhost;user=root;password=123456;database=coachreservationdb;";
+        public VehicleCatalog()
         {
-            this.database = database;
         }
 
         public List<Vehicle> GetAllVehicles()
@@ -20,29 +19,28 @@ namespace CoachReservation
             List<Vehicle> vehicles = new List<Vehicle>();
             try
             {
-                database.OpenDatabase();
-                string query = "SELECT VehicleId, LicensePlate, VehicleType FROM Vehicle";
-                MySqlCommand cmd = new MySqlCommand(query, database.SqlConn);
-                MySqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
-                    Vehicle vehicle = new Vehicle(reader.GetInt32("VehicleId"), reader.GetString("LicensePlate"), reader.GetString("VehicleType"));
-                    vehicles.Add(vehicle);
-                }
+                    connection.Open();
+                    string query = "SELECT VehicleId, LicensePlate, VehicleType FROM Vehicle";
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+                    MySqlDataReader reader = cmd.ExecuteReader();
 
-                reader.Close();
-                return vehicles;
+                    while (reader.Read())
+                    {
+                        Vehicle vehicle = new Vehicle(reader.GetInt32("VehicleId"), reader.GetString("LicensePlate"), reader.GetString("VehicleType"));
+                        vehicles.Add(vehicle);
+                    }
+
+                    reader.Close();
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error getting vehicles: " + ex.Message);
-                return new List<Vehicle>();
             }
-            finally
-            {
-                database.CloseDatabase();
-            }
+
+            return vehicles;
         }
 
         public int GetMaxSeats()
@@ -50,17 +48,18 @@ namespace CoachReservation
             int maxSeats = 0;
             try
             {
-                database.OpenDatabase();
-                string query = "SELECT MAX(TotalSeats) as MaxSeats FROM Vehicle";
-                MySqlCommand cmd = new MySqlCommand(query, database.SqlConn);
-                object result = cmd.ExecuteScalar();
-
-                if (result != null && result != DBNull.Value)
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
-                    maxSeats = Convert.ToInt32(result);
-                }
+                    connection.Open();
+                    string query = "SELECT MAX(TotalSeats) as MaxSeats FROM Vehicle";
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+                    object result = cmd.ExecuteScalar();
 
-                database.CloseDatabase();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        maxSeats = Convert.ToInt32(result);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -73,29 +72,28 @@ namespace CoachReservation
         {
             try
             {
-                database.OpenDatabase();
-                string query = "SELECT VehicleId, LicensePlate, VehicleType FROM Vehicle WHERE VehicleId = @vehicleId";
-                MySqlCommand cmd = new MySqlCommand(query, database.SqlConn);
-                cmd.Parameters.AddWithValue("@vehicleId", vehicleId);
-
-                MySqlDataReader reader = cmd.ExecuteReader();
-                if (reader.Read())
+                using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {
-                    Vehicle vehicle = new Vehicle(reader.GetInt32("VehicleId"), reader.GetString("LicensePlate"), reader.GetString("VehicleType"));
+                    connection.Open();
+                    string query = "SELECT VehicleId, LicensePlate, VehicleType FROM Vehicle WHERE VehicleId = @vehicleId";
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+                    cmd.Parameters.AddWithValue("@vehicleId", vehicleId);
+
+                    MySqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        Vehicle vehicle = new Vehicle(reader.GetInt32("VehicleId"), reader.GetString("LicensePlate"), reader.GetString("VehicleType"));
+                        reader.Close();
+                        return vehicle;
+                    }
                     reader.Close();
-                    return vehicle;
+                    return null;
                 }
-                reader.Close();
-                return null;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error getting vehicle: " + ex.Message);
                 return null;
-            }
-            finally
-            {
-                database.CloseDatabase();
             }
         }
     }

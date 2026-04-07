@@ -10,16 +10,15 @@ namespace CoachReservation
         {
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
-            Database database = new Database();
-            RouteCatalog routeCatalog = new RouteCatalog(database);
-            VehicleCatalog vehicleCatalog = new VehicleCatalog(database);
-            TripCatalog tripCatalog = new TripCatalog(database);
-            SeatMapCatalog seatMapCatalog = new SeatMapCatalog(database);
-            TicketCatalog ticketCatalog = new TicketCatalog(database);
-            SeatCatalog seatCatalog = new SeatCatalog(database);
+            RouteCatalog routeCatalog = new RouteCatalog();
+            VehicleCatalog vehicleCatalog = new VehicleCatalog();
+            TripCatalog tripCatalog = new TripCatalog();
+            SeatMapCatalog seatMapCatalog = new SeatMapCatalog();
+            TicketCatalog ticketCatalog = new TicketCatalog();
+            SeatCatalog seatCatalog = new SeatCatalog();
             ApplicationConfiguration.Initialize();
             //Application.Run(new ConfigureSeatMapForm(seatMapCatalog, vehicleCatalog, seatCatalog));
-            Application.Run(new SearchTripsForm(routeCatalog, vehicleCatalog, tripCatalog, seatMapCatalog, seatCatalog, ticketCatalog));
+            //Application.Run(new SearchTripsForm(routeCatalog, vehicleCatalog, tripCatalog, seatMapCatalog, seatCatalog, ticketCatalog));
             //Application.Run(new CheckInForm(ticketCatalog));
         }
     }
