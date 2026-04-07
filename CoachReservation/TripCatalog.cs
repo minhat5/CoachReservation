@@ -10,8 +10,6 @@ namespace CoachReservation
 {
     public class TripCatalog
     {
-        private string connectionString = "server=localhost;user=root;password=123456;database=coachreservationdb;";
-
         public TripCatalog()
         {
         }
@@ -21,7 +19,7 @@ namespace CoachReservation
             List<Trip> trips = new List<Trip>();
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
 
@@ -70,7 +68,7 @@ namespace CoachReservation
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
 

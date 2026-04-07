@@ -9,7 +9,6 @@ namespace CoachReservation
 {
     public class TicketCatalog
     {
-        private string connectionString = "server=localhost;user=root;password=123456;database=coachreservationdb;";
         public TicketCatalog()
         {
         }
@@ -18,7 +17,7 @@ namespace CoachReservation
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection())
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     string query = "UPDATE Ticket SET TicketStatus = @newStatus WHERE TicketId = @ticketId";
                     MySqlCommand cmd = new MySqlCommand(query, connection);
@@ -37,7 +36,7 @@ namespace CoachReservation
             List<string> seats = new List<string>();
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
 
@@ -76,7 +75,7 @@ namespace CoachReservation
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
 
@@ -176,7 +175,7 @@ namespace CoachReservation
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
                     string query = "SELECT PassengerId, FullName, PhoneNumber FROM Passenger WHERE PassengerId = @passengerId";
@@ -216,7 +215,7 @@ namespace CoachReservation
 
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
                     string seatIdList = string.Join(",", seatIds);
@@ -251,7 +250,7 @@ namespace CoachReservation
             MySqlTransaction transaction = null;
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
                     transaction = connection.BeginTransaction();

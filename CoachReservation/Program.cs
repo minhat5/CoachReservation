@@ -19,7 +19,7 @@ namespace CoachReservation
             ApplicationConfiguration.Initialize();
             //Application.Run(new ConfigureSeatMapForm(seatMapCatalog, vehicleCatalog, seatCatalog));
             //Application.Run(new SearchTripsForm(routeCatalog, vehicleCatalog, tripCatalog, seatMapCatalog, seatCatalog, ticketCatalog));
-            //Application.Run(new CheckInForm(ticketCatalog));
+            Application.Run(new CheckInForm(ticketCatalog));
         }
     }
 }

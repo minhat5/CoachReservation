@@ -9,7 +9,6 @@ namespace CoachReservation
 {
     public class VehicleCatalog
     {
-        private string connectionString = "server=localhost;user=root;password=123456;database=coachreservationdb;";
         public VehicleCatalog()
         {
         }
@@ -19,7 +18,7 @@ namespace CoachReservation
             List<Vehicle> vehicles = new List<Vehicle>();
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
                     string query = "SELECT VehicleId, LicensePlate, VehicleType FROM Vehicle";
@@ -48,7 +47,7 @@ namespace CoachReservation
             int maxSeats = 0;
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
                     string query = "SELECT MAX(TotalSeats) as MaxSeats FROM Vehicle";
@@ -72,7 +71,7 @@ namespace CoachReservation
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
                     string query = "SELECT VehicleId, LicensePlate, VehicleType FROM Vehicle WHERE VehicleId = @vehicleId";

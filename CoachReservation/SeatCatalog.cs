@@ -9,8 +9,6 @@ namespace CoachReservation
 {
     public class SeatCatalog
     {
-        private string connectionString = "server=localhost;user=root;password=123456;database=coachreservationdb;";
-
         public SeatCatalog()
         {}
 
@@ -19,7 +17,7 @@ namespace CoachReservation
             List<Seat> seats = new List<Seat>();
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
                     string query = @"SELECT SeatId, SeatCode, Floor, RowIndex, ColumnIndex, SeatType 
@@ -46,7 +44,7 @@ namespace CoachReservation
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
                     foreach (var seat in seats)
@@ -101,7 +99,7 @@ namespace CoachReservation
             List<int> bookedSeats = new List<int>();
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
 
@@ -136,7 +134,7 @@ namespace CoachReservation
 
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
 

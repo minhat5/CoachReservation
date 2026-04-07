@@ -9,8 +9,6 @@ namespace CoachReservation
 {
     public class SeatMapCatalog
     {
-        private string connectionString = "server=localhost;user=root;password=123456;database=coachreservationdb;";
-
         public SeatMapCatalog()
         {
         }
@@ -19,7 +17,7 @@ namespace CoachReservation
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
                     string query = "SELECT SeatMapId, VehicleId, Floors, GridColumns, GridRows FROM SeatMap WHERE VehicleId = @vehicleId";
@@ -47,7 +45,7 @@ namespace CoachReservation
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
                 {
                     connection.Open();
 

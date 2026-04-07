@@ -9,14 +9,13 @@ namespace CoachReservation
 {
     public class RouteCatalog
     {
-        private string connectionString = "server=localhost;user=root;password=123456;database=coachreservationdb;";
         public RouteCatalog(){}
 
         public List<string> GetUniqueDeparturePoints()
         {
             List<string> departurePoints = new List<string>();
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
             {
                 try
                 {
@@ -46,7 +45,7 @@ namespace CoachReservation
         {
             List<string> destinations = new List<string>();
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
             {
                 try
                 {
