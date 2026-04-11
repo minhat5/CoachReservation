@@ -14,7 +14,6 @@ namespace CoachReservation
     {
         private const int DemoPassengerId = 1;
         private Trip selectedTrip;
-        private TripCatalog tripCatalog;
         private SeatMapCatalog seatMapCatalog;
         private SeatCatalog seatCatalog;
         private TicketCatalog ticketCatalog;
@@ -23,10 +22,9 @@ namespace CoachReservation
         private Dictionary<int, List<Button>> seatGrids;
         private SeatMap currentSeatMap;
 
-        public BookTicketForm(Trip trip, TripCatalog tripCatalog, SeatMapCatalog seatMapCatalog, SeatCatalog seatCatalog, TicketCatalog ticketCatalog)
+        public BookTicketForm(Trip trip, SeatMapCatalog seatMapCatalog, SeatCatalog seatCatalog, TicketCatalog ticketCatalog)
         {
             this.selectedTrip = trip;
-            this.tripCatalog = tripCatalog;
             this.seatMapCatalog = seatMapCatalog;
             this.seatCatalog = seatCatalog;
             this.ticketCatalog = ticketCatalog;
@@ -295,11 +293,6 @@ namespace CoachReservation
             isSeatSelectionConfirmed = false;
             UpdateSeatDisplay();
             LoadSeatMap();
-        }
-
-        private void BookTicketForm_Load(object sender, EventArgs e)
-        {
-            // Initialize form on load
         }
     }
 }

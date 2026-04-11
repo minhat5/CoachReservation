@@ -116,7 +116,7 @@ namespace CoachReservation
 
                 if (selectedTrip != null)
                 {
-                    BookTicketForm bookTicketForm = new BookTicketForm(selectedTrip, tripCatalog, seatMapCatalog, seatCatalog, ticketCatalog);
+                    BookTicketForm bookTicketForm = new BookTicketForm(selectedTrip, seatMapCatalog, seatCatalog, ticketCatalog);
                     bookTicketForm.ShowDialog();
                 }
             }

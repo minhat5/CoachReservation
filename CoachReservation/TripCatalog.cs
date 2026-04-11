@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,11 +10,8 @@ namespace CoachReservation
 {
     public class TripCatalog
     {
-        private Database database;
-
-        public TripCatalog(Database database)
+        public TripCatalog()
         {
-            this.database = database;
         }
 
         public List<Trip> SearchTrips(string departurePoint, string destination, DateTime departureDate)
@@ -21,9 +19,11 @@ namespace CoachReservation
             List<Trip> trips = new List<Trip>();
             try
             {
-                database.OpenDatabase();
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
+                {
+                    connection.Open();
 
-                string query = @"
+                    string query = @"
                     SELECT t.TripId, t.DepartureDate, t.DepartureTime, t.BasePrice, t.Status,
                            r.RouteId, r.DeparturePoint, r.Destination,
                            v.VehicleId, v.LicensePlate, v.VehicleType, v.TotalSeats
@@ -36,44 +36,43 @@ namespace CoachReservation
                     AND CONCAT(DATE(t.DepartureDate), ' ', TIME_FORMAT(t.DepartureTime, '%H:%i:%s')) > NOW()
                     ORDER BY t.DepartureTime";
 
-                MySqlCommand cmd = new MySqlCommand(query, database.SqlConn);
-                cmd.Parameters.AddWithValue("@departurePoint", departurePoint);
-                cmd.Parameters.AddWithValue("@destination", destination);
-                cmd.Parameters.AddWithValue("@departureDate", departureDate.Date);
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+                    cmd.Parameters.AddWithValue("@departurePoint", departurePoint);
+                    cmd.Parameters.AddWithValue("@destination", destination);
+                    cmd.Parameters.AddWithValue("@departureDate", departureDate.Date);
 
-                MySqlDataReader reader = cmd.ExecuteReader();
+                    MySqlDataReader reader = cmd.ExecuteReader();
 
-                while (reader.Read())
-                {
-                    Route route = new Route(reader.GetInt32("RouteId"), reader.GetString("DeparturePoint"), reader.GetString("Destination"));
+                    while (reader.Read())
+                    {
+                        Route route = new Route(reader.GetInt32("RouteId"), reader.GetString("DeparturePoint"), reader.GetString("Destination"));
 
-                    Vehicle vehicle = new Vehicle(reader.GetInt32("VehicleId"), reader.GetString("LicensePlate"), reader.GetString("VehicleType"), reader.GetInt32("TotalSeats"));
+                        Vehicle vehicle = new Vehicle(reader.GetInt32("VehicleId"), reader.GetString("LicensePlate"), reader.GetString("VehicleType"), reader.GetInt32("TotalSeats"));
 
-                    Trip trip = new Trip(reader.GetInt32("TripId"), route, vehicle, reader.GetDateTime("DepartureDate"), reader.GetTimeSpan("DepartureTime"), reader.GetDecimal("BasePrice"), reader.GetString("Status"));
+                        Trip trip = new Trip(reader.GetInt32("TripId"), route, vehicle, reader.GetDateTime("DepartureDate"), reader.GetTimeSpan("DepartureTime"), reader.GetDecimal("BasePrice"), reader.GetString("Status"));
 
-                    trips.Add(trip);
+                        trips.Add(trip);
+                    }
+
+                    reader.Close();
                 }
-
-                reader.Close();
-                return trips;
             }
             catch (Exception ex)
             {
-                return new List<Trip>();
+                Console.WriteLine("Error searching trips: " + ex.Message);
             }
-            finally
-            {
-                database.CloseDatabase();
-            }
+            return trips;
         }
 
         public int GetEmptySeatsCount(int tripId)
         {
             try
             {
-                database.OpenDatabase();
+                using (MySqlConnection connection = new MySqlConnection("server=localhost;user=root;password=123456;database=coachreservationdb;"))
+                {
+                    connection.Open();
 
-                string query = @"
+                    string query = @"
                     SELECT v.TotalSeats - COUNT(ts.TripSeatId) as EmptySeats
                     FROM Trip t
                     LEFT JOIN Vehicle v ON t.VehicleId = v.VehicleId
@@ -81,14 +80,14 @@ namespace CoachReservation
                     WHERE t.TripId = @tripId
                     GROUP BY v.TotalSeats";
 
-                MySqlCommand cmd = new MySqlCommand(query, database.SqlConn);
-                cmd.Parameters.AddWithValue("@tripId", tripId);
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+                    cmd.Parameters.AddWithValue("@tripId", tripId);
 
-                object result = cmd.ExecuteScalar();
-                int emptySeats = result != null && result != DBNull.Value ? Convert.ToInt32(result) : 0;
+                    object result = cmd.ExecuteScalar();
+                    int emptySeats = result != null && result != DBNull.Value ? Convert.ToInt32(result) : 0;
 
-                database.CloseDatabase();
-                return emptySeats;
+                    return emptySeats;
+                }
             }
             catch (Exception ex)
             {
