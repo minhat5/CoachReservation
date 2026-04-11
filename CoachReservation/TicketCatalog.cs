@@ -180,12 +180,11 @@ namespace CoachReservation
                     MySqlDataReader reader = cmd.ExecuteReader();
                     if (reader.Read())
                     {
-                        Passenger passenger = new Passenger
-                        {
-                            PassengerId = reader.GetInt32("PassengerId"),
-                            FullName = reader.GetString("FullName"),
-                            PhoneNumber = reader.GetString("PhoneNumber")
-                        };
+                        Passenger passenger = new Passenger(
+                            reader.GetInt32("PassengerId"),
+                            reader.GetString("FullName"),
+                            reader.GetString("PhoneNumber")
+                        );
                         reader.Close();
                         return passenger;
                     }

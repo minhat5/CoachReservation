@@ -370,7 +370,6 @@
             Controls.Add(groupBox1);
             Name = "BookTicketForm";
             Text = "Đặt vé";
-            Load += BookTicketForm_Load;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             groupBox2.ResumeLayout(false);

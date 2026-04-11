@@ -294,11 +294,6 @@ namespace CoachReservation
             UpdateSeatDisplay();
             LoadSeatMap();
         }
-
-        private void BookTicketForm_Load(object sender, EventArgs e)
-        {
-            // Initialize form on load
-        }
     }
 }
 
